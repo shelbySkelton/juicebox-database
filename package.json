@@ -1,12 +1,27 @@
 {
   "name": "juicebox-database",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
+    "seed:dev": "nodemon ./db/seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.7.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shelbySkelton/juicebox-database.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shelbySkelton/juicebox-database/issues"
+  },
+  "homepage": "https://github.com/shelbySkelton/juicebox-database#readme",
+  "description": ""
 }
