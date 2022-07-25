@@ -177,10 +177,6 @@ async function createPost({
 }
 
 
-
-
-
-
 async function getPostsByUser(userId) {
   try{
     const { rows: postIds } = await client.query(`
@@ -200,6 +196,39 @@ async function getPostsByUser(userId) {
 }
 
 
+async function getPostById(postId) {
+  try {
+    const { rows: [ post ]  } = await client.query(`
+      SELECT *
+      FROM posts
+      WHERE id=$1;
+    `, [postId]);
+
+    const { rows: tags } = await client.query(`
+      SELECT tags.*
+      FROM tags
+      JOIN post_tags ON tags.id=post_tags."tagId"
+      WHERE post_tags."postId"=$1;
+    `, [postId])
+
+    const { rows: [author] } = await client.query(`
+      SELECT id, username, name, location
+      FROM users
+      WHERE id=$1;
+    `, [post.authorId])
+
+    post.tags = tags;
+    post.author = author;
+
+    delete post.authorId;
+
+    return post;
+  } catch (error) {
+    throw error;
+  }
+}
+
+//TAG METHODS ************************************************
 
 async function createTags(tagList) {
   if (tagList.length === 0) {
@@ -259,38 +288,6 @@ async function addTagsToPost(postId, tagList) {
   }
 }
 
-async function getPostById(postId) {
-  try {
-    const { rows: [ post ]  } = await client.query(`
-      SELECT *
-      FROM posts
-      WHERE id=$1;
-    `, [postId]);
-
-    const { rows: tags } = await client.query(`
-      SELECT tags.*
-      FROM tags
-      JOIN post_tags ON tags.id=post_tags."tagId"
-      WHERE post_tags."postId"=$1;
-    `, [postId])
-
-    const { rows: [author] } = await client.query(`
-      SELECT id, username, name, location
-      FROM users
-      WHERE id=$1;
-    `, [post.authorId])
-
-    post.tags = tags;
-    post.author = author;
-
-    delete post.authorId;
-
-    return post;
-  } catch (error) {
-    throw error;
-  }
-}
-
 
 async function getPostsByTagName(tagName) {
   try {
@@ -310,6 +307,18 @@ async function getPostsByTagName(tagName) {
   }
 }
 
+async function getAllTags() {
+  try {
+    const { rows } = await client.query(`
+      SELECT * 
+      FROM tags;
+    `);
+
+    return { rows }
+  } catch (error) {
+    throw error;
+  }
+}
 
 // and export them
 module.exports = {
@@ -317,12 +326,14 @@ module.exports = {
   getAllUsers,
   createUser,
   updateUser,
+  getUserById,
   getAllPosts,
   createPost,
   updatePost,
   getPostsByUser,
-  getUserById,
   createTags,
+  getAllTags,
+  createPostTag,
   addTagsToPost,
   getPostsByTagName
 }
