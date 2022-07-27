@@ -145,14 +145,10 @@ async function createPost({
     const { tags } = fields;
     delete fields.tags;
 
-  //rebuilding set string
-    const keys = Object.keys(fields);
-    for (let key of keys) {
-      if (!['title','content'].includes(key)) return;
-    }
-    const setString = keys.map(
+    //rebuilding set string
+    const setString = Object.keys(fields).map(
       (key, index) => `"${ key }"=$${ index + 1 }`
-    ).join(', ');
+      ).join(', ');
     
 
 
@@ -218,6 +214,13 @@ async function getPostById(postId) {
       WHERE id=$1;
     `, [postId]);
 
+    if (!post) {
+      throw {
+        name: "PostNotFoundError",
+        message: "Could not find a post with that postId"
+      };
+    }
+  
     const { rows: tags } = await client.query(`
       SELECT tags.*
       FROM tags
@@ -346,6 +349,7 @@ module.exports = {
   createPost,
   updatePost,
   getPostsByUser,
+  getPostById,
   createTags,
   getAllTags,
   createPostTag,
